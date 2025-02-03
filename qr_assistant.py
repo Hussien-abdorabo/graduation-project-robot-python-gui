@@ -6,7 +6,7 @@ class QRAssistant:
         self.root = root
         self.utils = utils
         self.next_step = next_step  # Function to proceed with image capture
-        self.QR_IMAGE_PATH = "logo.png"  # ✅ QR code image path
+        self.QR_IMAGE_PATH = "QR.png"  # ✅ QR code image path
 
 
 
