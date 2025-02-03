@@ -121,20 +121,34 @@ class Survey:
     def show_prediction_results(self, diagnosis_response):
         """ Displays AI-generated diagnosis and recommendations, then asks user if they want to continue. """
         self.utils.clear_window()
+        disease = "Unknown"
+        treatment = "Unknown"
+        doctor_name = "Dr. John Smith"
+        doctor_phone = "+123456789"
+        doctor_location = "123 Health St, Medical City"
+        print(f"Diagnosis Response: {diagnosis_response}")  # ✅ Debugging
         #  check if it's a string or array
         if isinstance(diagnosis_response, str):
             self.utils.create_label(f"🔍 Diagnosis Result: {diagnosis_response}", 16, "bold")
             self.utils.create_label("👨‍⚕️ Doctor Contact:", 14, "bold")
-            self.utils.create_label("🩺 Dr. John Smith", 14)
-            self.utils.create_label("📞 Phone: +123456789", 14)
-            self.utils.create_label("📍 Location: 123 Health St, Medical City", 14)
+            self.utils.create_label(f"🩺 {doctor_name}", 14)
+            self.utils.create_label(f"📞 Phone: {doctor_phone}", 14)
+            self.utils.create_label(f"📍 Location: {doctor_location}", 14)
         else:
             disease = diagnosis_response["condition"] if "condition" in diagnosis_response else "Unknown"
             treatment = diagnosis_response["explanation"] if "explanation" in diagnosis_response else "Unknown"
             doctor_name = diagnosis_response.get("doctor_name", "Dr. John Smith")
             doctor_phone = diagnosis_response.get("doctor_phone", "+123456789")
             doctor_location = diagnosis_response.get("doctor_location", "123 Health St, Medical City")
+            self.utils.create_label(f"🔍 Diagnosis Result: {disease}", 16, "bold")
+            self.utils.create_label(f"💊 Treatment: {treatment}", 14)
+            self.utils.create_label("👨‍⚕️ Doctor Contact:", 14, "bold")
+            self.utils.create_label(f"🩺 {doctor_name}", 14)
+            self.utils.create_label(f"📞 Phone: {doctor_phone}", 14)
+            self.utils.create_label(f"📍 Location: {doctor_location}", 14)
 
-
-        # ✅ Ask user if they want to continue
+            # ✅ Ask user if they want to continue
         self.consultation.ask_user_to_continue()
+
+
+
