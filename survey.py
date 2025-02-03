@@ -63,14 +63,13 @@ class Survey:
                                  padx=20)
 
     def start_scan_process(self):
-        """ Allows the user to capture three disease-related photos before AI diagnosis. """
-        self.photo_count = 0  # Reset counter
+        """ Allows the user to capture a single image of the disease before AI diagnosis. """
         self.utils.clear_window()
-        self.utils.create_label("Please capture 3 images of the disease for better diagnosis.", 14)
-        self.capture_more_photos()
+        self.utils.create_label("Please capture an image of the disease for better diagnosis.", 14)
+        self.capture_photo()
 
-    def capture_more_photos(self):
-        """ Opens camera for capturing disease photos. """
+    def capture_photo(self):
+        """ Opens the camera and allows the user to capture a single disease-related photo. """
         self.camera.cap = cv2.VideoCapture(0)
 
         if not self.camera.cap.isOpened():
@@ -79,9 +78,6 @@ class Survey:
 
         self.video_label = Label(self.root)
         self.video_label.pack()
-
-        self.progress_label = Label(self.root, text=f"Captured: {self.photo_count}/3", font=("Helvetica", 14))
-        self.progress_label.pack()
 
         self.update_frame()
         self.utils.create_button("Capture Photo", self.capture_and_store)
@@ -98,51 +94,47 @@ class Survey:
             self.root.after(20, self.update_frame)
 
     def capture_and_store(self):
-        """ Captures and stores an image, updating progress. """
+        """ Captures and stores a single image, then proceeds to diagnosis. """
         ret, frame = self.camera.cap.read()
         if ret:
-            filename = os.path.join(self.DISEASE_IMAGE_DIR, f"disease_photo_{self.photo_count + 1}.jpg")
+            filename = os.path.join(self.DISEASE_IMAGE_DIR, "disease_photo.jpg")
             cv2.imwrite(filename, frame)
-            self.photo_count += 1
-            self.progress_label.config(text=f"Captured: {self.photo_count}/3")
-
-        if self.photo_count == 3:
             self.camera.cap.release()
-            self.send_images_for_diagnosis()
+            self.send_image_for_diagnosis(filename)  # ✅ Send only one image for diagnosis
 
-    def send_images_for_diagnosis(self):
-        """ Sends the captured images to the backend AI model for diagnosis. """
+    def send_image_for_diagnosis(self, image_path):
+        """ Sends the captured image to the backend AI model for diagnosis. """
         self.utils.clear_window()
-        self.utils.create_label("🔍 Sending images for diagnosis...", 14)
+        self.utils.create_label("🔍 Sending image for diagnosis...", 14)
+        print(f"Sending image for diagnosis: {image_path}")
 
-        # ✅ Collect captured images
-        image_paths = [os.path.join(self.DISEASE_IMAGE_DIR, f"disease_photo_{i + 1}.jpg") for i in range(3)]
+        # ✅ Send single image to the API
+        response = APIService.diagnose_skin_disease(image_path)  # ✅ Already a dict, no need for .json()
 
-        # ✅ Send images to the API
-        response = APIService.diagnose_skin_disease(image_paths)
+        print(f"API Response: {response}")  # ✅ Debugging
 
-        if response.get("success"):
-            self.show_prediction_results(response)
+        if response.get("status") == "success":  # ✅ Correctly access dictionary keys
+            self.show_prediction_results(response.get("message"))
         else:
-            self.utils.show_toast("Error", response.get("message"))
+            self.utils.show_toast("Error", response.get("message", "Unknown error"))
 
     def show_prediction_results(self, diagnosis_response):
         """ Displays AI-generated diagnosis and recommendations, then asks user if they want to continue. """
         self.utils.clear_window()
+        #  check if it's a string or array
+        if isinstance(diagnosis_response, str):
+            self.utils.create_label(f"🔍 Diagnosis Result: {diagnosis_response}", 16, "bold")
+            self.utils.create_label("👨‍⚕️ Doctor Contact:", 14, "bold")
+            self.utils.create_label("🩺 Dr. John Smith", 14)
+            self.utils.create_label("📞 Phone: +123456789", 14)
+            self.utils.create_label("📍 Location: 123 Health St, Medical City", 14)
+        else:
+            disease = diagnosis_response["condition"] if "condition" in diagnosis_response else "Unknown"
+            treatment = diagnosis_response["explanation"] if "explanation" in diagnosis_response else "Unknown"
+            doctor_name = diagnosis_response.get("doctor_name", "Dr. John Smith")
+            doctor_phone = diagnosis_response.get("doctor_phone", "+123456789")
+            doctor_location = diagnosis_response.get("doctor_location", "123 Health St, Medical City")
 
-        disease = diagnosis_response.get("disease", "Unknown Condition")
-        treatment = diagnosis_response.get("treatment", "No suggested treatment available.")
-        doctor_name = diagnosis_response.get("doctor_name", "Dr. John Smith")
-        doctor_phone = diagnosis_response.get("doctor_phone", "+123456789")
-        doctor_location = diagnosis_response.get("doctor_location", "123 Health St, Medical City")
-
-        # 🏥 Diagnosis & Recommendations
-        self.utils.create_label(f"🔍 Diagnosis Result: {disease}", 16, "bold")
-        self.utils.create_label(f"💊 Suggested Medicine: {treatment}", 14)
-        self.utils.create_label("👨‍⚕️ Doctor Contact:", 14, "bold")
-        self.utils.create_label(f"🩺 {doctor_name}", 14)
-        self.utils.create_label(f"📞 Phone: {doctor_phone}", 14)
-        self.utils.create_label(f"📍 Location: {doctor_location}", 14)
 
         # ✅ Ask user if they want to continue
         self.consultation.ask_user_to_continue()

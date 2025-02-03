@@ -5,3 +5,4 @@ captured_images/
 qr.webp
 /__pycache__
 .env
+/.run
