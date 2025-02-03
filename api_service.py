@@ -52,19 +52,20 @@ class APIService:
             return {"success": False, "message": str(e)}
 
     @staticmethod
-    def register_user(name, email, password, image_path):
+    def register_user(name, email, password,password_confirmation, image_path):
         """ Sends user registration data to the backend API and saves the token. """
         url = f"{BASE_URL}/register"
         files = {'photo': open(image_path, 'rb')}
-        data = {'name': name, 'email': email, 'password': password}
+        data = {'name': name, 'email': email, 'password': password, 'password_confirmation': password_confirmation}
 
         try:
             response = requests.post(url, data=data, files=files)
             result = response.json()
 
-            if result.get("success"):
+            if "token" in result and "user" in result:
                 APIService.token = result.get("token")  # ✅ Save token globally
-                return {"success": True, "message": "Registration successful!", "token": APIService.token}
+                APIService.user_data = result.get("user")  # ✅ Store user info
+                return {"success": True, "message": "Registration successful!", "token": APIService.token, "user": APIService.user_data}
             else:
                 return {"success": False, "message": result.get("message", "Registration failed.")}
 
