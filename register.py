@@ -5,8 +5,9 @@ from camera import Camera
 import re  # ✅ For generating a slug from the user's name & email
 from api_service import APIService
 
+
 class Register:
-    def __init__(self, root, utils):
+    def __init__(self, root, utils, show_user_info):
         self.root = root
         self.utils = utils
         self.name_entry = None
@@ -17,10 +18,51 @@ class Register:
         self.user_photos_dir = "user_photos"
         os.makedirs(self.user_photos_dir, exist_ok=True)  # ✅ Ensure folder exists
         self.user_data = {}  # ✅ Store user data before clearing UI
+        self.show_user_info = show_user_info
 
         # ✅ Camera initialized but will only start when user clicks "Capture"
-        self.camera = Camera(root, utils, self.capture_photo)
+        self.camera = Camera(root, utils, self.handle_registration_photo)
 
+    def start_camera(self):
+        """ Saves user input before opening the camera. """
+        self.user_data["name"] = self.name_entry.get().strip()
+        self.user_data["email"] = self.email_entry.get().strip()
+        self.user_data["password1"] = self.password1_entry.get().strip()
+        self.user_data["password2"] = self.password2_entry.get().strip()
+
+        if not self.user_data["name"] or not self.user_data["email"]:
+            self.utils.show_toast("Error", "Please enter your name and email before capturing a photo.")
+            return
+
+        self.utils.clear_window()  # ✅ Now safe because data is stored
+        self.camera.start_camera()
+
+    def handle_registration_photo(self, image_path):
+        """ Handles the captured photo and completes the registration. """
+        self.captured_image_path = image_path  # ✅ Store the captured image path
+        self.register_user()  # ✅ Call registration after capturing photo
+
+    def register_user(self):
+        """ Validates and registers the user with the backend API. """
+        name = self.user_data["name"]
+        email = self.user_data["email"]
+        password1 = self.user_data["password1"]
+        password2 = self.user_data["password2"]
+
+        if not self.captured_image_path:
+            self.utils.show_toast("Error", "Please capture a profile photo!")
+            return
+
+        # ✅ Send data to the backend API
+        response = APIService.register_user(name, email, password1, password2,"patient", self.captured_image_path)
+        print(f"🔍 Registration Response 2: {response}")
+        if response.get("success"):
+            self.utils.show_toast("Success", "Registration successful! You are now logged in.")
+            APIService.token = response.get("token")  # ✅ Store token globally
+            APIService.user_data = response.get("user")  # ✅ Store user data globally
+            self.show_user_info()
+        else:
+            self.utils.show_toast("Error", response.get("message"))
     def show_registration_form(self):
         """ Displays the registration form for new users. """
         self.utils.clear_window()
@@ -66,66 +108,3 @@ class Register:
         # ✅ Register Button
         Button(self.root, text="Register", command=self.register_user, font=("Helvetica", 14), bg="#008CBA",
                fg="white").pack(pady=10)
-
-    def start_camera(self):
-        """ Saves user input before opening the camera. """
-        self.user_data["name"] = self.name_entry.get().strip()
-        self.user_data["email"] = self.email_entry.get().strip()
-        self.user_data["password1"] = self.password1_entry.get().strip()
-        self.user_data["password2"] = self.password2_entry.get().strip()
-
-        if not self.user_data["name"] or not self.user_data["email"]:
-            self.utils.show_toast("Error", "Please enter your name and email before capturing a photo.")
-            return
-
-        self.utils.clear_window()  # ✅ Now safe because data is stored
-        self.camera.start_camera()
-
-    def capture_photo(self):
-        """ Saves the captured image and returns to registration form. """
-        name = self.user_data.get("name", "").strip()
-        email = self.user_data.get("email", "").strip()
-
-        # ✅ Generate a slug from name & email
-        slug = re.sub(r'[^a-zA-Z0-9]+', '-', f"{name}-{email}").lower()
-        image_filename = f"{slug}.jpg"
-        image_path = os.path.join(self.user_photos_dir, image_filename)
-
-        # ✅ Move the captured image to `user_photos/`
-        if os.path.exists("captured_images/captured_photo.jpg"):
-            os.rename("captured_images/captured_photo.jpg", image_path)
-            self.captured_image_path = image_path  # ✅ Store new image path
-            self.utils.show_toast("Success", "Profile photo saved successfully!")
-        else:
-            self.utils.show_toast("Error", "Photo capture failed!")
-
-        # ✅ Reload registration form with previous user input
-        self.show_registration_form()
-
-    def register_user(self):
-        """ Validates and registers the user with the backend API. """
-        name = self.name_entry.get().strip()
-        email = self.email_entry.get().strip()
-        password1 = self.password1_entry.get().strip()
-        password2 = self.password2_entry.get().strip()
-
-        if not name or not email or not password1 or not password2:
-            self.utils.show_toast("Error", "All fields are required!")
-            return
-
-        if password1 != password2:
-            self.utils.show_toast("Error", "Passwords do not match!")
-            return
-
-        if not self.captured_image_path:
-            self.utils.show_toast("Error", "Please capture a profile photo!")
-            return
-
-        # ✅ Send data to the backend API
-        response = APIService.register_user(name, email, password1, self.captured_image_path)
-
-        if response.get("success"):
-            self.utils.show_toast("Success", "Registration successful! You are now logged in.")
-            APIService.token = response.get("token")  # ✅ Store token globally
-        else:
-            self.utils.show_toast("Error", response.get("message"))
