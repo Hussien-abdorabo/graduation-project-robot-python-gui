@@ -48,7 +48,17 @@ class Survey:
         button_frame.pack()
 
         self.utils.create_button("Yes", self.skin_photo_avalibilty, 10, button_frame, "left", 20)
-        self.utils.create_button("No", self.ask_how_are_you, 10, button_frame, "left", 20)
+        self.utils.create_button("No", self.continue_with_diagnosing_or_not, 10, button_frame, "left", 20)
+
+    def continue_with_diagnosing_or_not(self):
+        """ Asks if the user can provide a picture of the disease. """
+        self.utils.clear_window()
+        self.utils.create_label("So how can i help you iam here to help you if you have any skin diseases Want to continue or not?", 14)
+        button_frame = tk.Frame(self.root)
+        button_frame.pack()
+        self.utils.create_button("Yes", self.start_scan_process, frame=button_frame, side="left", padx=20)
+        self.utils.create_button("No", self.qr_assistant.exit_application, frame=button_frame, side="left",
+                                 padx=20)
 
     def skin_photo_avalibilty(self):
         """ Asks if the user can provide a picture of the disease. """
@@ -57,18 +67,24 @@ class Survey:
 
         button_frame = tk.Frame(self.root)
         button_frame.pack()
-
         self.utils.create_button("Yes", self.start_scan_process, frame=button_frame, side="left", padx=20)
         self.utils.create_button("No", self.qr_assistant.show_qr_code_for_co_pilot, frame=button_frame, side="left",
                                  padx=20)
 
+
     def start_scan_process(self):
         """ Allows the user to capture a single image of the disease before AI diagnosis. """
         self.utils.clear_window()
-        self.utils.create_label("Please capture an image of the disease for better diagnosis.", 14)
-        self.capture_photo()
+        self.loading_camera()
+    def loading_camera(self):
+        """ Displays a loading message before starting the camera. """
+        self.utils.clear_window()
+        self.utils.create_label("📷 Loading camera...", 16, pady=10)
+        # ✅ Delay starting the camera to show the loading message
+        self.root.after(1000, self.capture_photo)
 
     def capture_photo(self):
+        self.utils.create_label("Please capture an image of the disease for better diagnosis.", 14)
         """ Opens the camera and allows the user to capture a single disease-related photo. """
         self.camera.cap = cv2.VideoCapture(0)
 

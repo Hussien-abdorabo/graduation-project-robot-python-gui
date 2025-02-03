@@ -9,20 +9,32 @@ class Camera:
     def __init__(self, root, utils, callback):
         self.root = root
         self.utils = utils
-        self.callback = callback
+        self.callback = callback  # ✅ Now it can be login OR registration
         self.cap = None
         self.IMAGE_DIR = "captured_images"
         os.makedirs(self.IMAGE_DIR, exist_ok=True)
 
-    def start_camera(self):
-        """ Starts the camera for an existing user and enables photo capture. """
+    def loading_camera(self):
+        """ Displays a loading message before starting the camera. """
         self.utils.clear_window()
-        self.utils.create_label("Look at the camera and capture your photo", 16, pady=10)
+        self.utils.create_label("📷 Loading camera...", 16, pady=10)
+        # ✅ Delay starting the camera to show the loading message
+        self.root.after(2000, self.start_camera)
+
+    def start_camera(self):
+
+        """ Starts the camera feed and displays the video feed. """
 
         self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
             self.utils.show_toast("Error", "Cannot access the camera")
             return
+
+        # ✅ Remove loading message before displaying the camera
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        self.utils.create_label("Look at the camera and capture your photo", 16, pady=10)
 
         self.video_label = Label(self.root)
         self.video_label.pack()
@@ -42,7 +54,7 @@ class Camera:
             self.root.after(20, self.update_frame)
 
     def capture_photo(self):
-        """ Captures and saves the photo, then logs in the user via face recognition. """
+        """ Captures and saves the photo, then executes the callback function. """
         ret, frame = self.cap.read()
         if ret:
             filename = os.path.join(self.IMAGE_DIR, "captured_photo.jpg")
@@ -57,19 +69,9 @@ class Camera:
 
             self.utils.clear_window()  # ✅ Ensure UI is reset before showing the next step
 
-            # ✅ Send captured image to backend for login
-            response = APIService.login_with_face(filename)
-            print("Login response:", response.get("token"))
-            if response.get("token"):
-                self.utils.show_toast("Success", "Login successful! Welcome back.")
-                print(f"✅ Login successful! Callback function: {self.callback}")  # ✅ Debugging
-
-                # ✅ Check if callback exists
-                if callable(self.callback):
-                    print("✅ Executing callback function (show_user_info)...")
-                    self.root.after(1000, self.callback)  # ✅ Move to user info screen after 1 second
-                else:
-                    print("❌ Callback function is MISSING or Not Callable!")
+            # ✅ Execute the callback function
+            if callable(self.callback):
+                print("✅ Executing callback function...")
+                self.callback(filename)  # ✅ Pass image path to callback function
             else:
-                self.utils.show_toast("Error", response.get("message"))
-                self.utils.create_button("Try Again", self.start_camera, 12)  # ✅ Allow retry
+                print("❌ Callback function is missing or not callable!")

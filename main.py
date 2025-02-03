@@ -55,8 +55,16 @@ class DrRobotApp:
         button_frame.pack()
 
         ttk.Button(button_frame, text="Yes", command=self.register.show_registration_form, bootstyle=PRIMARY).pack(side="left", padx=20)
-        ttk.Button(button_frame, text="No", command=self.camera.start_camera, bootstyle=DANGER).pack(side="left", padx=20)
+        ttk.Button(button_frame, text="No", command=self.destroy_buttons, bootstyle=DANGER).pack(side="left", padx=20)
 
+    def destroy_buttons(self):
+        """ Destroys all buttons in the main window. """
+        for widget in self.root.winfo_children():
+            if isinstance(widget, ttk.Button):
+                widget.destroy()
+
+        self.utils.clear_window()
+        self.camera.loading_camera()
     def show_user_info(self):
         """ Displays user info after login. """
         self.utils.clear_window()

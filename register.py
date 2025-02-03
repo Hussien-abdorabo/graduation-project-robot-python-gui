@@ -35,12 +35,12 @@ class Register:
             return
 
         self.utils.clear_window()  # ✅ Now safe because data is stored
-        self.camera.start_camera()
+        self.camera.loading_camera()
 
     def handle_registration_photo(self, image_path):
         """ Handles the captured photo and completes the registration. """
         self.captured_image_path = image_path  # ✅ Store the captured image path
-        self.register_user()  # ✅ Call registration after capturing photo
+        self.show_registration_form()  # ✅ Call registration after capturing photo
 
     def register_user(self):
         """ Validates and registers the user with the backend API. """
@@ -62,7 +62,10 @@ class Register:
             APIService.user_data = response.get("user")  # ✅ Store user data globally
             self.show_user_info()
         else:
+            self.utils.clear_window()
             self.utils.show_toast("Error", response.get("message"))
+            self.utils.create_button("Try Again", self.show_registration_form, 12)
+
     def show_registration_form(self):
         """ Displays the registration form for new users. """
         self.utils.clear_window()
