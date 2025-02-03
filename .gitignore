@@ -4,3 +4,4 @@ captured_images/
 .idea/
 qr.webp
 /__pycache__
+.env

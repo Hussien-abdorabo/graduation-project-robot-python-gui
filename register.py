@@ -125,6 +125,7 @@ class Register:
         response = APIService.register_user(name, email, password1, self.captured_image_path)
 
         if response.get("success"):
-            self.utils.show_toast("Success", "Registration successful! You can now log in.")
+            self.utils.show_toast("Success", "Registration successful! You are now logged in.")
+            APIService.token = response.get("token")  # ✅ Store token globally
         else:
             self.utils.show_toast("Error", response.get("message"))
