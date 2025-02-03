@@ -5,7 +5,7 @@ class DoctorConsultation:
     def __init__(self, root, utils):
         self.root = root
         self.utils = utils
-        self.QR_IMAGE_PATH = "logo.png"  # The QR code image
+        self.QR_IMAGE_PATH = "QR.png"  # The QR code image
 
     def ask_user_to_continue(self):
         """ Ask the user if they want to continue speaking with the doctor. """
