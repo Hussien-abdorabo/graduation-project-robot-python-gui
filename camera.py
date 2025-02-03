@@ -19,7 +19,7 @@ class Camera:
 
         self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
-            messagebox.showerror("Error", "Cannot access the camera")
+            self.utils.show_toast("Error", "Cannot access the camera")
             return
 
         self.video_label = Label(self.root)

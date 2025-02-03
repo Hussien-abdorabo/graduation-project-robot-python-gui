@@ -1,6 +1,8 @@
 from tkinter import Label, Button, Frame
 from PIL import Image, ImageTk
 import os
+from tkinter import Toplevel, Label
+
 
 class Utils:
     def __init__(self, root):
@@ -47,3 +49,23 @@ class Utils:
             img_label.pack()
         else:
             self.create_label("Image not found", 14, "bold")
+
+    def show_toast(self, message_type="info", message="", duration=3000):
+        """ Displays a temporary toast notification with different styles. """
+        toast = Toplevel(self.root)
+        toast.overrideredirect(True)
+        toast.geometry("+500+300")
+
+        # 🎨 Set colors based on message type
+        if message_type == "Error":
+            bg_color = "red"
+            icon = "❌ "
+        elif message_type == "Warning":
+            bg_color = "orange"
+            icon = "⚠️ "
+        else:  # Default to "info"
+            bg_color = "green"
+            icon = "✅ "
+
+        Label(toast, text=f"{icon} {message}", bg=bg_color, fg="white", font=("Arial", 12)).pack(padx=10, pady=5)
+        self.root.after(duration, toast.destroy)

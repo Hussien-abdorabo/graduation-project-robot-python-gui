@@ -6,6 +6,8 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 from doctor_consultation import DoctorConsultation
 from qr_assistant import QRAssistant
+from api_service import APIService  # ✅ Import APIService
+
 
 class Survey:
     def __init__(self, root, utils, camera, next_step):
@@ -18,11 +20,7 @@ class Survey:
         self.consultation = DoctorConsultation(root, utils)  # ✅ Use new module
         self.qr_assistant = QRAssistant(root, utils, self.start_scan_process)  # ✅ Use new module
 
-    # def skin_photo_avalibilty(self):
-    #     """ Ask user if they can provide a picture. """
-    #     self.qr_assistant.ask_for_image()  # ✅ Use QRAssistant instead
         os.makedirs(self.DISEASE_IMAGE_DIR, exist_ok=True)
-    
 
     def ask_how_are_you(self):
         """ Ask how the user is feeling today. """
@@ -61,7 +59,8 @@ class Survey:
         button_frame.pack()
 
         self.utils.create_button("Yes", self.start_scan_process, frame=button_frame, side="left", padx=20)
-        self.utils.create_button("No", self.qr_assistant.show_qr_code_for_co_pilot, frame=button_frame, side="left", padx=20)
+        self.utils.create_button("No", self.qr_assistant.show_qr_code_for_co_pilot, frame=button_frame, side="left",
+                                 padx=20)
 
     def start_scan_process(self):
         """ Allows the user to capture three disease-related photos before AI diagnosis. """
@@ -75,7 +74,7 @@ class Survey:
         self.camera.cap = cv2.VideoCapture(0)
 
         if not self.camera.cap.isOpened():
-            messagebox.showerror("Error", "Cannot access the camera")
+            self.utils.show_toast("Error", "Cannot access the camera")
             return
 
         self.video_label = Label(self.root)
@@ -102,35 +101,48 @@ class Survey:
         """ Captures and stores an image, updating progress. """
         ret, frame = self.camera.cap.read()
         if ret:
-            filename = os.path.join(self.DISEASE_IMAGE_DIR, f"disease_photo_{self.photo_count+1}.jpg")
+            filename = os.path.join(self.DISEASE_IMAGE_DIR, f"disease_photo_{self.photo_count + 1}.jpg")
             cv2.imwrite(filename, frame)
             self.photo_count += 1
             self.progress_label.config(text=f"Captured: {self.photo_count}/3")
 
         if self.photo_count == 3:
             self.camera.cap.release()
-            self.simulate_prediction()
+            self.send_images_for_diagnosis()
 
-    def simulate_prediction(self):
-        """ Simulates AI processing for diagnosis. """
+    def send_images_for_diagnosis(self):
+        """ Sends the captured images to the backend AI model for diagnosis. """
         self.utils.clear_window()
-        self.utils.create_label("Processing images through AI model...", 14)
-        self.root.after(2000, self.show_prediction_results)
+        self.utils.create_label("🔍 Sending images for diagnosis...", 14)
 
-    def show_prediction_results(self):
+        # ✅ Collect captured images
+        image_paths = [os.path.join(self.DISEASE_IMAGE_DIR, f"disease_photo_{i + 1}.jpg") for i in range(3)]
+
+        # ✅ Send images to the API
+        response = APIService.diagnose_skin_disease(image_paths)
+
+        if response.get("success"):
+            self.show_prediction_results(response)
+        else:
+            self.utils.show_toast("Error", response.get("message"))
+
+    def show_prediction_results(self, diagnosis_response):
         """ Displays AI-generated diagnosis and recommendations, then asks user if they want to continue. """
         self.utils.clear_window()
 
+        disease = diagnosis_response.get("disease", "Unknown Condition")
+        treatment = diagnosis_response.get("treatment", "No suggested treatment available.")
+        doctor_name = diagnosis_response.get("doctor_name", "Dr. John Smith")
+        doctor_phone = diagnosis_response.get("doctor_phone", "+123456789")
+        doctor_location = diagnosis_response.get("doctor_location", "123 Health St, Medical City")
+
         # 🏥 Diagnosis & Recommendations
-        self.utils.create_label("🔍 Diagnosis Result: Skin Infection", 16, "bold")
-        self.utils.create_label("💊 Suggested Medicine: Antibiotic Cream", 14)
+        self.utils.create_label(f"🔍 Diagnosis Result: {disease}", 16, "bold")
+        self.utils.create_label(f"💊 Suggested Medicine: {treatment}", 14)
         self.utils.create_label("👨‍⚕️ Doctor Contact:", 14, "bold")
-        self.utils.create_label("🩺 Dr. John Smith", 14)
-        self.utils.create_label("📞 Phone: +123456789", 14)
-        self.utils.create_label("📍 Location: 123 Health St, Medical City", 14)
+        self.utils.create_label(f"🩺 {doctor_name}", 14)
+        self.utils.create_label(f"📞 Phone: {doctor_phone}", 14)
+        self.utils.create_label(f"📍 Location: {doctor_location}", 14)
 
         # ✅ Ask user if they want to continue
         self.consultation.ask_user_to_continue()
-
-        
-        

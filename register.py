@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import Entry, Label, Button, messagebox
 from camera import Camera
 import re  # ✅ For generating a slug from the user's name & email
+from api_service import APIService
 
 class Register:
     def __init__(self, root, utils):
@@ -55,14 +56,16 @@ class Register:
         self.password2_entry.insert(0, password2_value)  # ✅ Restore previous value
 
         # ✅ Capture Profile Photo Button
-        Button(self.root, text="📷 Capture Profile Photo", command=self.start_camera, font=("Helvetica", 14), bg="#4CAF50", fg="white").pack(pady=10)
+        Button(self.root, text="📷 Capture Profile Photo", command=self.start_camera, font=("Helvetica", 14),
+               bg="#4CAF50", fg="white").pack(pady=10)
 
         # ✅ Show captured image if available
         if self.captured_image_path:
             self.utils.display_image(self.captured_image_path, 200, 200)
 
         # ✅ Register Button
-        Button(self.root, text="Register", command=self.register_user, font=("Helvetica", 14), bg="#008CBA", fg="white").pack(pady=10)
+        Button(self.root, text="Register", command=self.register_user, font=("Helvetica", 14), bg="#008CBA",
+               fg="white").pack(pady=10)
 
     def start_camera(self):
         """ Saves user input before opening the camera. """
@@ -72,7 +75,7 @@ class Register:
         self.user_data["password2"] = self.password2_entry.get().strip()
 
         if not self.user_data["name"] or not self.user_data["email"]:
-            messagebox.showerror("Error", "Please enter your name and email before capturing a photo.")
+            self.utils.show_toast("Error", "Please enter your name and email before capturing a photo.")
             return
 
         self.utils.clear_window()  # ✅ Now safe because data is stored
@@ -92,31 +95,36 @@ class Register:
         if os.path.exists("captured_images/captured_photo.jpg"):
             os.rename("captured_images/captured_photo.jpg", image_path)
             self.captured_image_path = image_path  # ✅ Store new image path
-            messagebox.showinfo("Success", "Profile photo saved successfully!")
+            self.utils.show_toast("Success", "Profile photo saved successfully!")
         else:
-            messagebox.showerror("Error", "Photo capture failed!")
+            self.utils.show_toast("Error", "Photo capture failed!")
 
         # ✅ Reload registration form with previous user input
         self.show_registration_form()
 
     def register_user(self):
-        """ Validates and registers the user with captured photo. """
+        """ Validates and registers the user with the backend API. """
         name = self.name_entry.get().strip()
         email = self.email_entry.get().strip()
         password1 = self.password1_entry.get().strip()
         password2 = self.password2_entry.get().strip()
 
         if not name or not email or not password1 or not password2:
-            messagebox.showerror("Error", "All fields are required!")
+            self.utils.show_toast("Error", "All fields are required!")
             return
 
         if password1 != password2:
-            messagebox.showerror("Error", "Passwords do not match!")
+            self.utils.show_toast("Error", "Passwords do not match!")
             return
 
         if not self.captured_image_path:
-            messagebox.showerror("Error", "Please capture a profile photo!")
+            self.utils.show_toast("Error", "Please capture a profile photo!")
             return
 
-        # ✅ Simulate sending data to an API (Replace with actual API call)
-        messagebox.showinfo("Success", f"User {name} registered successfully!\nProfile Image: {self.captured_image_path}\nPassword: {password1}")  
+        # ✅ Send data to the backend API
+        response = APIService.register_user(name, email, password1, self.captured_image_path)
+
+        if response.get("success"):
+            self.utils.show_toast("Success", "Registration successful! You can now log in.")
+        else:
+            self.utils.show_toast("Error", response.get("message"))

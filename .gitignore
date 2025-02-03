@@ -3,3 +3,4 @@ diseases-photos/
 captured_images/
 .idea/
 qr.webp
+/__pycache__
