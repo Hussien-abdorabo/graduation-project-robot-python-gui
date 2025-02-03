@@ -17,18 +17,32 @@ class DrRobotApp:
         self.style.theme_use("superhero")  # Apply theme correctly ✅
 
         self.utils = Utils(root)
-        self.camera = Camera(root, self.utils, self.show_user_info)  # ✅ Pass show_user_info as callback
+
+        # ✅ Pass specific function as callback
+        self.camera = Camera(root, self.utils, self.handle_login_photo)
         self.user_service = UserService()
         self.survey = Survey(root, self.utils, self.camera, self.ask_how_are_you)
-        self.register = Register(root, self.utils)
+        self.register = Register(root, self.utils, self.show_user_info)
 
         self.main_window()
+    def ask_how_are_you(self):
+        """ Ask how the user is feeling today. """
+        self.survey.ask_how_are_you()
+    def handle_login_photo(self, image_path):
+        """ Handles photo capture for login. """
+        response = APIService.login_with_face(image_path)
+        if response.get("token"):
+            self.utils.show_toast("Success", "Login successful! Welcome back.")
+            self.show_user_info()
+        else:
+            self.utils.show_toast("Error", response.get("message"))
+            self.utils.create_button("Try Again", self.camera.start_camera, 12)
 
     def main_window(self):
         """ Displays the main welcome screen. """
         self.utils.clear_window()
         self.utils.create_label("Welcome to Dr.Robot", 24, pady=20, weight="bold")
-        
+
         # Use ttkbootstrap Button
         ttk.Button(self.root, text="Start", command=self.ask_new_user, bootstyle=SUCCESS).pack(pady=10)
 
@@ -43,18 +57,11 @@ class DrRobotApp:
         ttk.Button(button_frame, text="Yes", command=self.register.show_registration_form, bootstyle=PRIMARY).pack(side="left", padx=20)
         ttk.Button(button_frame, text="No", command=self.camera.start_camera, bootstyle=DANGER).pack(side="left", padx=20)
 
-    def ask_how_are_you(self):
-        """ Ask how the user is feeling today. """
-        self.survey.ask_how_are_you()
-
     def show_user_info(self):
-        print("✅ Transitioning to user info screen...")
-        """ Displays user info after successful face recognition login. """
-        self.utils.clear_window()  # ✅ Ensure the UI resets
-
+        """ Displays user info after login. """
+        self.utils.clear_window()
         if APIService.user_data:
-            user = APIService.user_data  # ✅ Retrieve stored user data
-
+            user = APIService.user_data
             self.utils.create_label(f"👤 Username: {user['name']}", 14)
             self.utils.create_label(f"📧 Email: {user['email']}", 14)
             self.utils.display_image("captured_images/captured_photo.jpg", 200, 200)
