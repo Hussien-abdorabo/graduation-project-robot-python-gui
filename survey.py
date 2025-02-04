@@ -10,7 +10,7 @@ from api_service import APIService  # ✅ Import APIService
 
 
 class Survey:
-    def __init__(self, root, utils, camera, next_step):
+    def __init__(self, root, utils, camera,ApiService, next_step):
         self.root = root
         self.utils = utils
         self.camera = camera
@@ -19,6 +19,7 @@ class Survey:
         self.DISEASE_IMAGE_DIR = "diseases-photos"
         self.consultation = DoctorConsultation(root, utils)  # ✅ Use new module
         self.qr_assistant = QRAssistant(root, utils, self.start_scan_process)  # ✅ Use new module
+        self.api_service = ApiService
 
         os.makedirs(self.DISEASE_IMAGE_DIR, exist_ok=True)
 
@@ -139,15 +140,15 @@ class Survey:
         self.utils.clear_window()
         disease = "Unknown"
         treatment = "Unknown"
-        doctor_name = "Dr. John Smith"
-        doctor_phone = "+123456789"
-        doctor_location = "123 Health St, Medical City"
+        doctor_name = self.api_service.doctor_data.get("name", "Dr. John Smith")
+        doctor_phone = self.api_service.doctor_data.get("phone", "+123456789")
+        doctor_location = self.api_service.doctor_data.get("location", "123 Health St, Medical City")
         print(f"Diagnosis Response: {diagnosis_response}")  # ✅ Debugging
         #  check if it's a string or array
         if isinstance(diagnosis_response, str):
             self.utils.create_label(f"🔍 Diagnosis Result: {diagnosis_response}", 16, "bold")
             self.utils.create_label("👨‍⚕️ Doctor Contact:", 14, "bold")
-            self.utils.create_label(f"🩺 {doctor_name}", 14)
+            self.utils.create_label(f"🩺Name: {doctor_name}", 14)
             self.utils.create_label(f"📞 Phone: {doctor_phone}", 14)
             self.utils.create_label(f"📍 Location: {doctor_location}", 14)
         else:

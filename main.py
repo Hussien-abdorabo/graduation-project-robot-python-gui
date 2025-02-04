@@ -21,7 +21,7 @@ class DrRobotApp:
         # ✅ Pass specific function as callback
         self.camera = Camera(root, self.utils, self.handle_login_photo)
         self.user_service = UserService()
-        self.survey = Survey(root, self.utils, self.camera, self.ask_how_are_you)
+        self.survey = Survey(root, self.utils, self.camera, APIService,self.ask_how_are_you,)
         self.register = Register(root, self.utils, self.show_user_info)
 
         self.main_window()
@@ -74,6 +74,7 @@ class DrRobotApp:
             self.utils.create_label(f"📧 Email: {user['email']}", 14)
             self.utils.display_image("captured_images/captured_photo.jpg", 200, 200)
             self.utils.create_label(f"Welcome, {user['name']}!", 16, "bold")
+
 
             ttk.Button(self.root, text="Next", command=self.ask_how_are_you, bootstyle=INFO).pack(pady=10)
         else:

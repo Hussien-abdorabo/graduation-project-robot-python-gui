@@ -10,6 +10,7 @@ BASE_URL = os.getenv("BASE_URL")
 class APIService:
     token = None  # ✅ Store token globally
     user_data = None  # ✅ Store user info globally
+    doctor_data = None  # ✅ Store doctor info globally
 
     @staticmethod
     def login_with_face(image_path):
@@ -34,16 +35,19 @@ class APIService:
 
             # ✅ Check if 'user' exists in the response
             if "user" in result:
-                print(f"✅ User info found: {result['user']}")
+                print(f"✅ User info found: {result['user']}")  # ✅ Debug: Show extracted user  and doctor info
             else:
                 print("❌ User info NOT found in the response!")
 
             # ✅ Only proceed if both token and user exist
             if "token" in result and "user" in result:
                 APIService.token = result["token"]  # ✅ Save token globally
-                APIService.user_data = result["user"]  # ✅ Store user info
+                APIService.user_data = result["user"]
+                APIService.doctor_data = result["doctor"]
+
+                # ✅ Store user info
                 return {"success": True, "message": "Login successful!", "user": APIService.user_data,
-                        "token": APIService.token}
+                        "token": APIService.token, "doctor": APIService.doctor_data}
             else:
                 return {"success": False, "message": "Token or user data missing in API response."}
 
@@ -67,7 +71,9 @@ class APIService:
             if "token" in result and "user" in result:
                 APIService.token = result.get("token")  # ✅ Save token globally
                 APIService.user_data = result.get("user")  # ✅ Store user info
-                return {"success": True, "message": "Registration successful!", "token": APIService.token, "user": APIService.user_data}
+                APIService.doctor_data = result.get("doctor")  # ✅ Store doctor info
+                return {"success": True, "message": "Registration successful!", "token": APIService.token, "user": APIService.user_data,
+                        "doctor": APIService.doctor_data}
             else:
                 return {"success": False, "message": result.get("message", "Registration failed.")}
 
