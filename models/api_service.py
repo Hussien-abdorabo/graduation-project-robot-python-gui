@@ -49,7 +49,7 @@ class APIService:
                 return {"success": True, "message": "Login successful!", "user": APIService.user_data,
                         "token": APIService.token, "doctor": APIService.doctor_data}
             else:
-                return {"success": False, "message": "Token or user data missing in API response."}
+                return {"success": False, "message": result["message"]}
 
         except requests.exceptions.RequestException as e:
             print(f"⚠️ Request Error: {str(e)}")
@@ -75,7 +75,7 @@ class APIService:
                 return {"success": True, "message": "Registration successful!", "token": APIService.token, "user": APIService.user_data,
                         "doctor": APIService.doctor_data}
             else:
-                return {"success": False, "message": result.get("message", "Registration failed.")}
+                return {"success": False, "message": result.get("message", "Registration failed."),"errors" : result.get("errors",{})}
 
         except requests.exceptions.RequestException as e:
             return {"success": False, "message": str(e)}

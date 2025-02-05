@@ -1,8 +1,11 @@
-user_photos/
-diseases-photos/
-captured_images/
+assets/user_photos/
+assets/diseases-photos/
+assets/captured_images/
 .idea/
 qr.webp
 /__pycache__
 .env
 /.run
+/controllers/__pycache__
+/models/__pycache__
+/views/__pycache__

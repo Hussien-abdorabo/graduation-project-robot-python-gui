@@ -1,8 +1,8 @@
-from tkinter import Label, Button, Frame
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw
 import os
 from tkinter import Toplevel, Label
-
+from ttkbootstrap import Frame, Button  # ✅ Correct usage
+from ttkbootstrap.style import Style
 
 class Utils:
     def __init__(self, root):
@@ -26,31 +26,48 @@ class Utils:
         label = Label(frame, text=text, font=("Helvetica", font_size, weight))
         label.pack(pady=pady)
 
-    def create_button(self, text, command, width=10, frame=None, side="top", padx=0):
-        """ Creates a centered button inside the specified frame. """
+    def create_button(self, text, command, width=10, frame=None, side="top", padx=0, bootstyle="info"):
+        """ Creates a rounded button using ttkbootstrap. """
         parent = frame if frame else self.root
 
-        button_frame = Frame(parent)  # ✅ Center the button
+        button_frame = Frame(parent)  # ✅ Ensure this is ttkbootstrap.Frame
         button_frame.pack(expand=True)
-        btn = Button(button_frame, text=text, command=command, width=width)
+
+        btn = Button(
+            button_frame,
+            text=text,
+            command=command,
+            width=width,
+            bootstyle=bootstyle  # ✅ Use a valid bootstyle
+        )
         btn.pack(side=side, padx=padx, pady=5)
 
     def display_image(self, image_path, width, height):
-        """ Displays a centered image in the UI. """
+        """ Displays a centered rounded image in the UI. """
         if os.path.exists(image_path):
-            img = Image.open(image_path)
-            img = img.resize((width, height))
+            img = Image.open(image_path).resize((width, height), Image.LANCZOS)
+            img = img.convert("RGBA")  # ✅ Ensure transparency support
+
+            # ✅ Create a circular mask
+            mask = Image.new("L", (width, height), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, width, height), fill=255)
+
+            # ✅ Apply the mask to round the corners
+            img.putalpha(mask)
+
+            # ✅ Convert for Tkinter display
             img = ImageTk.PhotoImage(img)
 
             img_frame = Frame(self.root)  # ✅ Center image
-            img_frame.pack(expand=True)
-            img_label = Label(img_frame, image=img)
+            img_frame.pack(expand=True, pady=10)
+            img_label = Label(img_frame, image=img, borderwidth=0)
             img_label.image = img
             img_label.pack()
         else:
-            self.create_label("Image not found", 14, "bold")
+            self.create_label("Image not found", 16, "bold")
 
-    def show_toast(self, message_type="info", message="", duration=3000):
+    def show_toast(self, message_type="info", message="", duration=5000):
         """ Displays a temporary toast notification with different styles. """
         toast = Toplevel(self.root)
         toast.overrideredirect(True)
