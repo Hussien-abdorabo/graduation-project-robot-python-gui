@@ -1,7 +1,6 @@
-# views/camera_view.py
 from tkinter import Label, Button
-from PIL import Image, ImageTk, ImageDraw
 import cv2
+from PIL import Image, ImageTk, ImageDraw
 
 
 class CameraView:
@@ -35,36 +34,34 @@ class CameraView:
         # ✅ Capture button added AFTER the camera loads
         self.utils.create_button("Capture Photo", self.capture_photo, 20)
 
+
     def update_frame(self):
-        """ Continuously updates the camera feed with slightly rounded corners. """
+        """ Continuously updates the camera feed with rounded corners. """
         if not hasattr(self, "video_label") or not self.video_label.winfo_exists():
             print("❌ Video label was destroyed. Stopping frame update.")
             return  # ✅ Prevent updating if the label is missing
 
         ret, frame = self.controller.cap.read()
         if ret:
+            # ✅ Resize frame
+            frame = cv2.resize(frame, (640, 480))
+
+            # ✅ Convert BGR to RGB for Tkinter
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # ✅ Convert frame to PIL Image
             img = Image.fromarray(frame_rgb)
 
-            # ✅ Resize image before applying rounded corners
-            img = img.resize((640, 480), Image.LANCZOS)
-
-            # ✅ Convert image to RGBA mode (Needed for rounded corners)
-            img = img.convert("RGBA")
-
-            # ✅ Create rounded corners mask (small radius)
-            radius = 20  # ⬅️ Adjust this to control the roundness
-            mask = Image.new("L", img.size, 255)  # Grayscale mask
+            # ✅ Create a rounded rectangle mask
+            mask = Image.new("L", (640, 480), 0)
             draw = ImageDraw.Draw(mask)
-            draw.rounded_rectangle((0, 0, img.width, img.height), radius=radius, fill=255)
+            border_radius = 40  # Adjust this for more or less rounded corners
+            draw.rounded_rectangle((0, 0, 640, 480), radius=border_radius, fill=255)
 
-            # ✅ Apply the mask to remove sharp corners
+            # ✅ Apply the mask
             img.putalpha(mask)
 
-            # ✅ Convert to RGB mode (Tkinter does not support alpha transparency)
-            img = img.convert("RGB")
-
-            # ✅ Convert image for Tkinter
+            # ✅ Convert to ImageTk format
             imgtk = ImageTk.PhotoImage(img)
 
             if self.video_label.winfo_exists():  # ✅ Ensure the label still exists before updating
@@ -92,7 +89,3 @@ class CameraView:
         if self.controller.cap:
             self.controller.cap.release()
             self.controller.cap = None  # ✅ Ensure no lingering camera instance
-
-
-
-

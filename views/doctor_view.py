@@ -1,5 +1,6 @@
 # views/doctor_view.py
-from tkinter import Label, Button, Frame
+from tkinter import Label, Button, Frame, ttk
+
 
 class DoctorView:
     def __init__(self, root, utils, controller,app):
@@ -10,13 +11,26 @@ class DoctorView:
 
     def ask_user_to_continue(self):
         """ Ask the user if they want to continue speaking with the doctor. """
-        self.utils.create_label("Would you like to continue speaking with the doctor?", 14, "bold")
+        # ✅ Create a frame for alignment (this ensures the label and buttons are closer together)
+        container_frame = ttk.Frame(self.root)
+        container_frame.pack(expand=True)  # Centers everything vertically
 
-        button_frame = Frame(self.root)
-        button_frame.pack(pady=10)
+        # ✅ Label inside the container (pady reduced to keep it close to the buttons)
+        label = ttk.Label(container_frame, text="Would you like to continue speaking with the doctor?", font=("Helvetica", 16))
+        label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
-        self.utils.create_button("Yes", self.show_qr_code, frame=button_frame, side="left", padx=20)
-        self.utils.create_button("No", self.app.exit_application, frame=button_frame, side="left", padx=20)
+        # ✅ Create a single frame for buttons (inside the same container)
+        button_frame = ttk.Frame(container_frame)
+        button_frame.pack(pady=60)  # ✅ Ensure buttons are just below the label
+
+        # ✅ Create buttons inside button_frame to align in a row
+        btn_yes = ttk.Button(button_frame, text="Good", command=self.show_qr_code, width=15,
+                             bootstyle="success")
+        btn_yes.pack(side="left", padx=10)
+
+        btn_no = ttk.Button(button_frame, text="Bad", command=self.app.exit_application,
+                            width=15, bootstyle="danger")
+        btn_no.pack(side="left", padx=10)
 
     def goodbye_message(self):
         """ Displays a farewell message. """

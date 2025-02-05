@@ -121,16 +121,17 @@ class DrRobotApp:
             image_frame.pack(pady=10)
             self.utils.display_image("assets/captured_images/captured_photo.jpg", 220, 220)  # ⬆️ Increased size
 
+            # ✅ Welcome Message (Larger Font)
+            welcome_frame = ttk.Frame(container_frame)
+            welcome_frame.pack(pady=10)
+            self.utils.create_label(f"🎉 Welcome, {user['name']} !", 25, "bold", pady=8)  # ⬆️ Increased font
+
+
             # ✅ User Info (Larger Font)
             user_info_frame = ttk.Frame(container_frame)
             user_info_frame.pack(pady=5)
             self.utils.create_label(f"👤 Username: {user['name']}", 18, weight="bold", pady=5)  # ⬆️ Increased font size
             self.utils.create_label(f"📧 Email: {user['email']}", 18, pady=5)
-
-            # ✅ Welcome Message (Larger Font)
-            welcome_frame = ttk.Frame(container_frame)
-            welcome_frame.pack(pady=10)
-            self.utils.create_label(f"🎉 Welcome, {user['name']}!", 20, "bold", pady=8)  # ⬆️ Increased font
 
             # ✅ Ensure the button is at the bottom of the screen
             button_frame = ttk.Frame(self.root)
