@@ -23,6 +23,7 @@ class SurveyView:
 
         # ✅ Label inside the container (pady reduced to keep it close to the buttons)
         label = ttk.Label(container_frame, text="How are you doing today?", font=("Helvetica", 16))
+        self.utils.speak_arabic("How are you doing today?")
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)
@@ -41,7 +42,8 @@ class SurveyView:
         """ Displays support message. """
         self.utils.clear_window()
         self.utils.create_label("Don't worry, I am here for you!", 16, pady=20)
-        self.root.after(1000, next_function)
+        self.utils.speak_arabic("Don't worry, I am here for you!")
+        self.root.after(2000, next_function)
 
     def ask_skin_disease(self):
         """ Ask if the user has a skin disease. """
@@ -52,6 +54,7 @@ class SurveyView:
 
         # ✅ Label inside the container (pady reduced to keep it close to the buttons)
         label = ttk.Label(container_frame, text="Do you suffer from any skin diseases?", font=("Helvetica", 16))
+        self.utils.speak_arabic("Do you suffer from any skin diseases?")
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)
@@ -76,6 +79,7 @@ class SurveyView:
 
         # ✅ Label inside the container (pady reduced to keep it close to the buttons)
         label = ttk.Label(container_frame, text="I am here to help you! Do you want to continue diagnosing or no?", font=("Helvetica", 16))
+        self.utils.speak_arabic("I am here to help you! Do you want to continue diagnosing or no?")
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)
@@ -102,6 +106,8 @@ class SurveyView:
         label = ttk.Label(container_frame, text="I'm an AI Model designed to help classify and diagnose the skin "
                                                 "dresses! You want to continue with me? ✨",
                           font=("Helvetica", 16))
+        self.utils.speak_arabic("I'm an AI Model designed to help classify and diagnose the skin dresses! You want to continue with me?")
+
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)
@@ -127,6 +133,8 @@ class SurveyView:
         # ✅ Label inside the container (pady reduced to keep it close to the buttons)
         label = ttk.Label(container_frame, text="Can you provide a picture of this disease so that I can help you?",
                           font=("Helvetica", 16))
+        self.utils.speak_arabic("Can you provide a picture of this disease so that I can help you?")
+
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)
@@ -146,6 +154,7 @@ class SurveyView:
         """ Displays loading message, then opens the camera for preview. """
         self.utils.clear_window()
         self.utils.create_label("📷 Loading camera...", 16, pady=10)
+        self.utils.speak_arabic("Loading camera")
         self.root.after(1000, self.show_camera_feed)
 
     def show_camera_feed(self):

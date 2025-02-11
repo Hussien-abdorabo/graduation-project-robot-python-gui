@@ -14,6 +14,7 @@ class CameraView:
         """ Displays loading message before camera opens """
         self.utils.clear_window()
         self.utils.create_label("📷 Loading camera...", 16, pady=10)
+        self.utils.speak_arabic("Loading camera")
         self.root.after(1000, self.show_camera_feed)
 
     def show_camera_feed(self):

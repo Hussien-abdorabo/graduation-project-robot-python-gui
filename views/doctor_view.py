@@ -17,6 +17,8 @@ class DoctorView:
 
         # ✅ Label inside the container (pady reduced to keep it close to the buttons)
         label = ttk.Label(container_frame, text="Would you like to continue speaking with the doctor?", font=("Helvetica", 16))
+        self.utils.speak_arabic("Would you like to continue speaking with the doctor?")
+
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)

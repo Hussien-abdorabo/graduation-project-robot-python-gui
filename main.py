@@ -55,11 +55,14 @@ class DrRobotApp:
         """ Displays the main welcome screen. """
         self.utils.clear_window()
         self.utils.create_label("Welcome to Dr.Robot", 24, pady=20, weight="bold")
+        # ✅ Disable buttons before speaking, then enable after speech
+        self.utils.speak_arabic("Welcome to Dr.Robot, The first AI Medical Assistant in the middle east, How can I Help you?")
         self.utils.create_button("Start", self.ask_new_user, width=15, bootstyle="primary")
 
     def ask_new_user(self):
         """ Ask if the user is new. """
         self.utils.clear_window()
+        print("✅ Switching to 'Are you a new user?' screen")  # ✅ Debugging
 
         # ✅ Create a frame for alignment (this ensures the label and buttons are closer together)
         container_frame = ttk.Frame(self.root)
@@ -67,6 +70,7 @@ class DrRobotApp:
 
         # ✅ Label inside the container (pady reduced to keep it close to the buttons)
         label = ttk.Label(container_frame, text="Are you a new user?", font=("Helvetica", 16))
+        self.utils.speak_arabic("Are you a new user?")
         label.pack(pady=10)  # ✅ Reduce padding to keep it closer to buttons
 
         # ✅ Create a single frame for buttons (inside the same container)
@@ -125,6 +129,7 @@ class DrRobotApp:
             welcome_frame = ttk.Frame(container_frame)
             welcome_frame.pack(pady=10)
             self.utils.create_label(f"🎉 Welcome, {user['name']} !", 25, "bold", pady=8)  # ⬆️ Increased font
+            self.utils.speak_arabic(f"Welcome {user['name']}, How can I help you today?")
 
 
             # ✅ User Info (Larger Font)
